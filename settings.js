@@ -4,7 +4,7 @@ const websiteList = document.getElementById("websiteList");
 const masterToggle = document.getElementById("masterToggle");
 const statusBadge = document.getElementById("statusBadge");
 
-let websites = [];
+let websitesData = {}; // Changed to object: { "youtube.com": true, "facebook.com": false }
 let enabled = false;
 
 // Initialize
@@ -13,8 +13,8 @@ loadData();
 // Add website
 addBtn.onclick = () => {
     const url = urlInput.value.trim();
-    if (url && !websites.includes(url)) {
-        websites.push(url);
+    if (url && !websitesData[url]) {
+        websitesData[url] = true; // Add as enabled by default
         saveData();
         urlInput.value = "";
         renderList();
@@ -37,9 +37,17 @@ masterToggle.onchange = () => {
     updateStatusBadge();
 };
 
+// Toggle individual website
+function toggleWebsite(url) {
+    websitesData[url] = !websitesData[url];
+    saveData();
+    renderList();
+    updateRules();
+}
+
 // Remove website
 function removeWebsite(url) {
-    websites = websites.filter(w => w !== url);
+    delete websitesData[url];
     saveData();
     renderList();
     updateRules();
@@ -47,6 +55,8 @@ function removeWebsite(url) {
 
 // Render website list
 function renderList() {
+    const websites = Object.keys(websitesData);
+    
     if (websites.length === 0) {
         websiteList.innerHTML = `
             <div class="empty-state">
@@ -57,23 +67,34 @@ function renderList() {
         return;
     }
     
-    websiteList.innerHTML = websites.map(url => `
-        <div class="website-item">
-            <span class="website-url">${url}</span>
-            <button class="btn-remove" onclick="removeWebsite('${url}')">Remove</button>
-        </div>
-    `).join("");
+    websiteList.innerHTML = websites.map(url => {
+        const isEnabled = websitesData[url];
+        return `
+            <div class="website-item ${!isEnabled ? 'disabled' : ''}">
+                <div class="website-left">
+                    <input 
+                        type="checkbox" 
+                        class="website-checkbox" 
+                        ${isEnabled ? 'checked' : ''} 
+                        onchange="toggleWebsite('${url}')"
+                    >
+                    <span class="website-url">${url}</span>
+                </div>
+                <button class="btn-remove" onclick="removeWebsite('${url}')">Remove</button>
+            </div>
+        `;
+    }).join("");
 }
 
 // Save data
 function saveData() {
-    chrome.storage.local.set({ websites, enabled });
+    chrome.storage.local.set({ websitesData, enabled });
 }
 
 // Load data
 function loadData() {
-    chrome.storage.local.get({ websites: [], enabled: false }, (data) => {
-        websites = data.websites;
+    chrome.storage.local.get({ websitesData: {}, enabled: false }, (data) => {
+        websitesData = data.websitesData;
         enabled = data.enabled;
         masterToggle.checked = enabled;
         renderList();
@@ -94,7 +115,10 @@ function updateStatusBadge() {
 
 // Update blocking rules
 function updateRules() {
-    if (!enabled || websites.length === 0) {
+    // Get only enabled websites
+    const enabledWebsites = Object.keys(websitesData).filter(url => websitesData[url]);
+    
+    if (!enabled || enabledWebsites.length === 0) {
         // Remove all rules
         chrome.declarativeNetRequest.updateDynamicRules({
             removeRuleIds: Array.from({ length: 100 }, (_, i) => i + 1)
@@ -104,8 +128,8 @@ function updateRules() {
         return;
     }
     
-    // Create rules for each website
-    const rules = websites.map((url, index) => ({
+    // Create rules for each enabled website
+    const rules = enabledWebsites.map((url, index) => ({
         id: index + 1,
         priority: 1,
         action: { type: "block" },
@@ -133,9 +157,10 @@ function updateRules() {
 
 // Refresh all tabs matching blocked websites
 function refreshBlockedTabs() {
-    if (websites.length === 0) return;
+    const allWebsites = Object.keys(websitesData);
+    if (allWebsites.length === 0) return;
     
-    const patterns = websites.map(url => `*://*${url}*/*`);
+    const patterns = allWebsites.map(url => `*://*${url}*/*`);
     
     chrome.tabs.query({}, (tabs) => {
         tabs.forEach(tab => {
@@ -150,5 +175,6 @@ function refreshBlockedTabs() {
     });
 }
 
-// Make removeWebsite globally accessible
+// Make functions globally accessible
+window.toggleWebsite = toggleWebsite;
 window.removeWebsite = removeWebsite;

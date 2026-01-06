@@ -192,13 +192,35 @@
         
         .website-item:hover {
             background: #e9ecef;
-            transform: translateX(5px);
+        }
+        
+        .website-item.disabled {
+            opacity: 0.5;
+        }
+        
+        .website-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        
+        .website-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #ff4757;
         }
         
         .website-url {
             color: #333;
             font-size: 14px;
             font-weight: 500;
+        }
+        
+        .website-item.disabled .website-url {
+            text-decoration: line-through;
+            color: #999;
         }
         
         .empty-state {
