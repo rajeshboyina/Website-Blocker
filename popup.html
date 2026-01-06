@@ -1,9 +1,43 @@
 <!DOCTYPE html>
 <html>
-    <body style="width:200px;text-align:center;font-family:Arial">
-        <h3>
-            Youtube Control
-        </h3>
+    <head>
+        <style>
+            body {
+                width: 200px;
+                text-align: center;
+                font-family: Arial;
+                padding: 10px;
+            }
+            h3 {
+                margin: 10px 0;
+            }
+            #btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                color: white;
+                transition: all 0.3s;
+            }
+            #btn.green {
+                background-color: #4CAF50;
+            }
+            #btn.green:hover {
+                background-color: #45a049;
+            }
+            #btn.red {
+                background-color: #f44336;
+            }
+            #btn.red:hover {
+                background-color: #da190b;
+            }
+        </style>
+    </head>
+    <body>
+        <h3>Youtube Control</h3>
         <button id="btn">Loading...</button>
         <script src="popup.js"></script>
     </body>

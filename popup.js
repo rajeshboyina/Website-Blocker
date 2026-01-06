@@ -18,7 +18,7 @@ const killYouTube = {
 };
 const btn = document.getElementById("btn");
 
-// INIT - Fixed: added .local
+// INIT
 chrome.storage.local.get({ "enabled": false }, data => {
     updateUI(data.enabled);
 });
@@ -37,5 +37,13 @@ btn.onclick = () => {
 };
 
 function updateUI(enabled) {
-    btn.textContent = enabled ? "ON: YouTube Internet OFF" : "OFF: YouTube Normal";
+    if (enabled) {
+        // RED - Internet blocked
+        btn.textContent = "ON: YouTube Blocked";
+        btn.className = "red";
+    } else {
+        // GREEN - Internet allowed
+        btn.textContent = "OFF: YouTube Normal";
+        btn.className = "green";
+    }
 }
