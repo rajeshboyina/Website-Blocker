@@ -31,6 +31,8 @@ btn.onclick = () => {
         chrome.declarativeNetRequest.updateDynamicRules({
             addRules: enabled ? [killYouTube] : [],
             removeRuleIds: enabled ? [] : [RULE_ID]
+        },()=>{
+            refreshYoutubeTabs();
         });
         updateUI(enabled);
     });
@@ -46,4 +48,11 @@ function updateUI(enabled) {
         btn.textContent = "OFF: YouTube Normal";
         btn.className = "green";
     }
+}
+function refreshYoutubeTabs(){
+    chrome.tabs.query({url:"*://*.youtube.com/*"},(tabs)=>{
+        tabs.forEach(tab=>{
+            chrome.tabs.reload(tab.id);
+        });
+    });
 }
