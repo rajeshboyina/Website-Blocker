@@ -8,10 +8,14 @@
         "tabs"
     ],
     "host_permissions": [
-        "*://*.youtube.com/*",
-        "*://*.googlevideo.com/*"
+        "*://*/*"
+        
     ],
     "action": {
-        "default_popup": "popup.html"
+        "default_title": "Website blocker"
+    },
+    "background":
+    {
+        "service_worker":"background.js"
     }
 }
